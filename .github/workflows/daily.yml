@@ -1,0 +1,33 @@
+name: 每日更新台股資料
+
+on:
+  schedule:
+    - cron: "40 7 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安裝套件
+        run: pip install requests
+
+      - name: 抓取並產生 data.json
+        run: python update_data.py
+
+      - name: 提交更新
+        run: |
+          git config user.name "stock-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data.json
+          git diff --staged --quiet || git commit -m "資料更新 $(date -u +%Y-%m-%d)"
+          git push
