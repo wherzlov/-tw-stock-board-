@@ -683,7 +683,9 @@
       <div style="display: flex; align-items: baseline; gap: 13px; flex-wrap: wrap">
         <h2 style="font-size: 26px; margin: 0">我的持股．我幫你顧</h2>
         <span style="font-size: 12px; color: var(--meta-600); text-wrap: pretty">{{ posTodo }}</span>
+        <button onClick="{{ onCopyWatch }}" class="btn btn-secondary" style="font-size: 11px; padding: 5px 11px; margin-left: auto; white-space: nowrap">{{ copyWatchLabel }}</button>
       </div>
+      <div style="font-size: 11px; color: var(--meta-600); margin-top: 6px; text-wrap: pretty">按上面的鍵會複製一段 JSON，貼進 repo 的 watchlist.json，每日更新就會為這些代號保留一年完整日 K（供回測與 K 線圖）。</div>
 
       <div style="display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; margin-top: 14px">
         <label class="field" style="display: grid; gap: 4px">
@@ -1625,6 +1627,7 @@ class Component extends DCLogic {
       .then(d => {
         if (!d || !Array.isArray(d.stocks) || !d.stocks.length) return Promise.reject("empty");
         this.setState({ live: d, liveState: "live", pool: 0, sel: null, fetchedAt: Date.now(), src: "data.json" });
+        this.loadMarket();
         // data.json 是收盤後的快照；接著在背景改抓即時價，抓得到就覆蓋
         this.liveScan(this.state.depth ?? 150);
       })
@@ -1864,6 +1867,7 @@ class Component extends DCLogic {
       .then(d => {
         if (!d || !Array.isArray(d.stocks) || !d.stocks.length) return Promise.reject("empty");
         this.setState({ live: d, liveState: "live", fetchedAt: d.fetchedAt || Date.now() });
+        this.loadMarket();
       })
       .catch(() => this.setState({ liveState: "demo" }));
   }
@@ -2408,14 +2412,66 @@ class Component extends DCLogic {
   all() {
     const live = this.state.live;
     if (live) {
-      if (this._liveKey !== live.asOf) {
-        this._liveKey = live.asOf;
+      const key = live.asOf + ":" + live.stocks.length;
+      if (this._liveKey !== key) {
+        this._liveKey = key;
         this._live = live.stocks.filter(s => s.bars && s.bars.length > 70).map(s => metrics(s, s.bars.map(b => ({ o: +b.o, h: +b.h, l: +b.l, c: +b.c, v: +b.v }))));
       }
       return dedupe(this._live, this.extras());
     }
     if (!this._d) this._d = UNIVERSE.map(analyse);
     return dedupe(this._d, this.extras());
+  }
+
+  // 第二層：全市場精簡快照。疊在 data.json 之上，重複代號以 data.json 為準
+  // 把持股＋存股計畫的代號輸出成 watchlist.json 內容
+  copyWatch = () => {
+    const codes = [];
+    (this.state.pos || []).forEach(p => { if (p.code && !codes.includes(p.code)) codes.push(p.code); });
+    (this.state.dca || []).forEach(p => { if (p.code && !codes.includes(p.code)) codes.push(p.code); });
+    if (!codes.length) { this.setState({ copyWatch: "沒有部位可複製" }); return; }
+    const text = JSON.stringify({ picks: codes }, null, 2);
+    const done = () => {
+      this.setState({ copyWatch: "已複製 " + codes.length + " 檔" });
+      setTimeout(() => this.setState({ copyWatch: "" }), 4000);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(() => window.prompt("手動複製：", text));
+    } else {
+      window.prompt("手動複製：", text);
+    }
+  };
+
+  loadMarket() {
+    if (this._mktTried) return;
+    this._mktTried = true;
+    fetch("market.json", { cache: "no-store" })
+      .then(res => res.ok ? res.json() : Promise.reject(res.status))
+      .then(d => {
+        if (!d || !Array.isArray(d.stocks) || !Array.isArray(d.dates)) return;
+        this.setState(st => {
+          const live = st.live;
+          if (!live) return {};
+          const have = new Set(live.stocks.map(s => s.code));
+          const add = [];
+          d.stocks.forEach(s => {
+            if (have.has(s.c) || !Array.isArray(s.b)) return;
+            const bars = [];
+            s.b.forEach((row, k) => {
+              if (!row) return;
+              bars.push({ d: d.dates[s.i + k], o: row[0], h: row[1], l: row[2], c: row[3], v: row[4] });
+            });
+            if (bars.length > 70) {
+              add.push({ code: s.c, name: s.n, sector: s.ind || "", pool: s.p ?? 0,
+                bars, div1y: s.d || 0, instDays: 0, conc: null, concChg: null });
+            }
+          });
+          if (!add.length) return {};
+          return { live: Object.assign({}, live, { stocks: live.stocks.concat(add) }),
+            marketTotal: live.stocks.length + add.length };
+        });
+      })
+      .catch(() => {});
   }
 
   extras() {
@@ -2872,7 +2928,7 @@ class Component extends DCLogic {
 
     return {
       asOf: (this.state.live && this.state.live.asOf) || "2026 / 08 / 14",
-      dataSource: this.state.liveState === "live" ? (this.state.src === "即時" ? "即時抓取" : "data.json 快照") + "．全市場 " + (this.state.marketTotal || all.length) + " 檔，已載入 " + all.length + " 檔" + (this.state.listNote ? "（" + this.state.listNote + "）" : "")
+      dataSource: this.state.liveState === "live" ? (this.state.src === "即時" ? "即時抓取" : "data.json 快照") + "．已載入 " + all.length + " 檔" + (this.state.marketTotal ? "／全市場 " + this.state.marketTotal + " 檔" : "，按「全市場掃描」可擴大範圍") + (this.state.listNote ? "（" + this.state.listNote + "）" : "")
         : this.state.liveState === "fetching" ? "抓取中 " + (this.state.prog || "")
         : this.state.liveState === "failed" ? "抓不到資料"
         : this.state.liveState === "loading" ? "讀取 data.json…" : "示意資料（按立即更新抓取）",
@@ -2901,6 +2957,8 @@ class Component extends DCLogic {
       total: this.computeTotal(all, myPos),
       pages: [["board", "看板"], ["total", "資產總覽"], ["pos", "我的持股"], ["save", "存股計畫"], ["pnl", "損益紀錄"]].map(([k, label]) => seg2((this.state.page || "board") === k, label, () => this.setState({ page: k }))),
       pnl,
+      onCopyWatch: this.copyWatch,
+      copyWatchLabel: this.state.copyWatch || "複製 watchlist.json",
       query: this.state.query, onQuery: e => this.setState({ query: e.target.value }),
       hasQuery: q.length > 0, noMatch: q.length > 0 && suggestions.length === 0, suggestions, poolTotal: all.length,
       uiZoom: LAYOUTS[this.state.layout ?? 1].zoom,
