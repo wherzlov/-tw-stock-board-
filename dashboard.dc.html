@@ -107,7 +107,12 @@
               <sc-if value="{{ qa.hasBt }}" hint-placeholder-val="{{ false }}">
                 <div style="border-top: 1px solid var(--color-divider); padding-top: 9px">
                   <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 6px">
-                    <span style="font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-accent)">逐檔回測．過去一年</span>
+                    <span style="font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-accent)">逐檔回測</span>
+                    <div style="display: flex; border: 1px solid var(--color-divider); border-radius: var(--radius-sm, 4px); overflow: hidden">
+                      <sc-for list="{{ qa.btMethodOpts }}" as="o" hint-placeholder-count="2">
+                        <button onClick="{{ o.onClick }}" style="font-size: 11px; padding: 3px 9px; border: none; background: {{ o.bg }}; color: {{ o.fg }}; cursor: pointer; font-family: inherit">{{ o.label }}</button>
+                      </sc-for>
+                    </div>
                     <span style="font-size: 11px; color: var(--meta-600)">{{ qa.bt.mode }}</span>
                   </div>
                   <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px 10px">
@@ -146,6 +151,20 @@
                       </div>
                     </sc-for>
                   </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ qa.hasBtShort }}" hint-placeholder-val="{{ false }}">
+                <div style="border-top: 1px solid var(--color-divider); padding-top: 9px">
+                  <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 6px">
+                    <span style="font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-accent)">逐檔回測</span>
+                    <div style="display: flex; border: 1px solid var(--color-divider); border-radius: var(--radius-sm, 4px); overflow: hidden">
+                      <sc-for list="{{ qa.btMethodOpts }}" as="o" hint-placeholder-count="2">
+                        <button onClick="{{ o.onClick }}" style="font-size: 11px; padding: 3px 9px; border: none; background: {{ o.bg }}; color: {{ o.fg }}; cursor: pointer; font-family: inherit">{{ o.label }}</button>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div style="font-size: 12px; color: var(--meta-700); text-wrap: pretty">{{ qa.btShort }}</div>
                 </div>
               </sc-if>
 
@@ -328,6 +347,7 @@
                 <tr class="row-pick" onClick="{{ a.onClick }}" style="cursor: pointer">
                   <td style="white-space: nowrap">
                     <div style="display: flex; align-items: baseline; gap: 8px">
+                      <button onClick="{{ a.onNote }}" class="btn btn-ghost" style="font-size: 11px; padding: 2px 8px; white-space: nowrap">{{ a.noteLabel }}</button>
                       <span style="font-size: 12px; color: var(--meta-600); font-variant-numeric: tabular-nums">{{ a.code }}</span>
                       <span style="font-size: 15px">{{ a.name }}</span>
                     </div>
@@ -442,7 +462,11 @@
           <button onClick="{{ c.onClick }}" style="font-size: 12px; padding: 5px 11px; border-radius: 3px; cursor: pointer; background: {{ c.bg }}; color: {{ c.fg }}; border: 1px solid {{ c.bd }}">{{ c.label }}</button>
         </sc-for>
         <button onClick="{{ trendToggle.onClick }}" style="font-size: 12px; padding: 5px 11px; border-radius: 3px; cursor: pointer; margin-left: 6px; background: {{ trendToggle.bg }}; color: {{ trendToggle.fg }}; border: 1px solid {{ trendToggle.bd }}">{{ trendToggle.label }}</button>
+        <button onClick="{{ sopToggle.onClick }}" style="font-size: 12px; padding: 5px 11px; border-radius: 3px; cursor: pointer; background: {{ sopToggle.bg }}; color: {{ sopToggle.fg }}; border: 1px solid {{ sopToggle.bd }}">{{ sopToggle.label }}</button>
       </div>
+      <sc-if value="{{ sopOn }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size: 11px; color: var(--meta-600); padding: 0 0 8px; text-wrap: pretty">{{ sopNote }}</div>
+      </sc-if>
       <div style="display: flex; flex-wrap: wrap; gap: 7px; padding: 2px 0 13px; border-bottom: 1px solid var(--color-divider)">
         <span style="font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--meta-600); align-self: center">條件</span>
         <sc-for list="{{ chips }}" as="c" hint-placeholder-count="11">
@@ -619,6 +643,54 @@
       </div>
 
       <div>
+        <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 9px">
+          <div style="font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-accent)">交易筆記</div>
+          <span style="font-size: 11px; color: var(--meta-600)">{{ notes2.count }}</span>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px">
+          <sc-for list="{{ notes2.quick }}" as="q" hint-placeholder-count="4">
+            <button onClick="{{ q.onClick }}" class="btn btn-secondary" style="font-size: 11px; padding: 4px 10px">{{ q.label }}</button>
+          </sc-for>
+        </div>
+        <textarea value="{{ notes2.draft }}" onChange="{{ notes2.onDraft }}" placeholder="按上面任一鍵帶入計畫，再補一句你自己的理由。價格會自動跟蹤，不用手抄數字。" rows="3" class="input" style="width: 100%; font-size: 12px; font-family: inherit; resize: vertical"></textarea>
+        <div style="display: flex; gap: 8px; align-items: center; margin-top: 7px">
+          <button onClick="{{ notes2.onSave }}" class="btn btn-primary" style="font-size: 12px; padding: 5px 13px">存入筆記</button>
+          <span style="font-size: 11px; color: var(--meta-600)">{{ notes2.msg }}</span>
+        </div>
+        <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px">
+          <sc-for list="{{ notes2.list }}" as="nt" hint-placeholder-count="2">
+            <div style="border-top: 1px solid var(--color-divider); padding-top: 7px">
+              <div style="display: flex; gap: 8px; align-items: baseline">
+                <span style="font-size: 11px; color: var(--meta-600); font-variant-numeric: tabular-nums">{{ nt.at }}</span>
+                <span style="font-size: 11px; color: var(--color-accent-800)">{{ nt.tag }}</span>
+                <button onClick="{{ nt.onDel }}" class="btn btn-ghost" style="font-size: 11px; padding: 2px 7px; margin-left: auto">刪除</button>
+              </div>
+              <div style="font-size: 12px; margin-top: 3px; text-wrap: pretty; white-space: pre-wrap">{{ nt.text }}</div>
+              <sc-if value="{{ nt.hasPlan }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top: 5px; padding-left: 9px; border-left: 2px solid var(--color-accent-300)">
+                  <div style="font-size: 11px; color: var(--meta-600); font-variant-numeric: tabular-nums; text-wrap: pretty">{{ nt.line }}</div>
+                  <div style="font-size: 12px; margin-top: 2px; color: {{ nt.tone }}; text-wrap: pretty">{{ nt.act }}</div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ notes2.hasOthers }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top: 16px; border-top: 1px solid var(--color-divider); padding-top: 10px">
+            <div style="font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-accent); margin-bottom: 8px">其他檔的筆記</div>
+            <div style="display: flex; flex-direction: column; gap: 7px">
+              <sc-for list="{{ notes2.others }}" as="o" hint-placeholder-count="3">
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: baseline">
+                  <button onClick="{{ o.onOpen }}" class="btn btn-ghost" style="font-size: 12px; padding: 2px 0; justify-self: start; text-align: left">{{ o.title }}</button>
+                  <span style="font-size: 11px; color: var(--meta-600); font-variant-numeric: tabular-nums">{{ o.meta }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+
+      <div>
         <div style="font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-accent); margin-bottom: 6px">三關卡檢核</div>
         <sc-for list="{{ checks }}" as="c" hint-placeholder-count="11">
           <div style="display: flex; gap: 9px; align-items: baseline; padding: 7px 0; border-bottom: 1px solid var(--color-divider)">
@@ -631,7 +703,7 @@
       </div>
 
       <div>
-        <div style="font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-accent); margin-bottom: 6px">我的持股．出場紀律（示意成本）</div>
+        <div style="font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-accent); margin-bottom: 6px">我的持股．出場紀律（成本請到「我的持股」頁填）</div>
         <sc-for list="{{ holdings }}" as="h" hint-placeholder-count="5">
           <div onClick="{{ h.onClick }}" class="row-pick" style="display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 9px 0; border-bottom: 1px solid var(--color-divider); cursor: pointer">
             <span style="font-size: 13px">{{ h.name }}</span>
@@ -1426,7 +1498,7 @@ const UNIVERSE = [
   ["2345", "智邦", "網通", 720, 0.58, 97, 1], ["2409", "友達", "面板", 17.8, -0.3, 101, 1],
   ["1216", "統一", "食品", 88.4, 0.12, 59, 2], ["2884", "玉山金", "金融", 28.4, 0.15, 103, 2]
 ];
-const MY_PICKS = ["2330", "2382", "2603", "2345", "3231"];
+const MY_PICKS = ["1402", "2330", "2618", "2883", "2885", "2886", "2887", "2891", "4162", "5469", "6125", "6164", "6189", "6213", "9934"];
 
 // 朱家泓式條件：趨勢（關卡一）→ 型態（關卡二）→ K 線與量（關卡三）
 const SIGNALS = [
@@ -1544,7 +1616,7 @@ function metrics(meta, bars) {
   // 停損：前波低與 3 日均線取近者，最遠不超過 1.5 ATR
   const stop = Math.min(Math.max(prevLow, ma3 - atr * 0.3), close - atr * 0.6);
   const risk = Math.max(close - stop, close * 0.012), target = close + risk * 2.6;
-  return { code, name, sector, pool, bars, seg, segOff, pv, close, chgPct, volRatio, ma3, ma5, ma20, ma60, atr, hist,
+  return { code, name, sector, pool, bars, seg, segOff, pv, close, chgPct, avgVol, volRatio, ma3, ma5, ma20, ma60, atr, hist,
     neckline, prevLow, boxHigh, boxLow, instDays, conc, concChg, hit, gate1, gate2, gate3, gatesPassed,
     entryType, stage, struct, kBarName, score, stop, risk, target, rr: (target - close) / risk };
 }
@@ -1593,6 +1665,121 @@ function btRun(stock, mode) {
   };
 }
 
+// 證交所產業別代碼→中文；market.json 舊版存的是數字碼，載入時統一換成中文
+const IND_NAME = { "01": "水泥", "02": "食品", "03": "塑膠", "04": "紡織", "05": "電機機械", "06": "電器電纜",
+  "07": "化學生技醫療", "08": "玻璃陶瓷", "09": "造紙", "10": "鋼鐵", "11": "橡膠", "12": "汽車", "13": "電子",
+  "14": "建材營造", "15": "航運", "16": "觀光餐旅", "17": "金融保險", "18": "貿易百貨", "19": "綜合",
+  "20": "其他", "21": "化學工業", "22": "生技醫療", "23": "油電燃氣", "24": "半導體",
+  "25": "電腦及週邊設備", "26": "光電", "27": "通信網路", "28": "電子零組件", "29": "電子通路",
+  "30": "資訊服務", "31": "其他電子", "32": "文化創意", "33": "農業科技", "34": "電子商務",
+  "35": "綠能環保", "36": "數位雲端", "37": "運動休閒", "38": "居家生活", "80": "管理股", "91": "債券", "97": "欄位變更", "99": "其他" };
+function indName(raw) {
+  const s = String(raw == null ? "" : raw).trim();
+  if (!s) return "";
+  return IND_NAME[s] || IND_NAME[s.padStart(2, "0")] || s;
+}
+
+// ── 林恩如 20 週均線波段：週線四條件進場、四條件出場 ──
+//   進場（四條全要）：站上 20 週線／突破近 12 週高點（趨勢線的程式化代替）／底底高＋峰峰高（W 底）／當週量 ≥ 前 20 週均量 1.5 倍
+//   出場（任一）：跌破 20 週線／20 週線轉下／M 頭（峰峰低＋底底低）／破前低且量縮
+//   第二進場點（回測 20 週線不破）預設關閉：LIN.allowPull
+const LIN = { maW: 20, boxW: 12, volX: 1.5, pivotW: 2, minLots: 500, allowPull: false };
+
+// 日 K 合成週 K（ISO 週；無日期時每 5 根當一週）
+function toWeekly(bars) {
+  const out = [];
+  let cur = null, key = null;
+  for (let idx = 0; idx < bars.length; idx++) {
+    const b = bars[idx];
+    const t = b.d ? Date.parse(b.d + "T00:00:00Z") : NaN;
+    const k = t ? Math.floor((t / 86400000 + 3) / 7) : Math.floor(idx / 5);
+    if (k !== key) {
+      if (cur) out.push(cur);
+      key = k;
+      cur = { d: b.d || ("第 " + (idx + 1) + " 根"), o: +b.o, h: +b.h, l: +b.l, c: +b.c, v: +b.v || 0 };
+    } else {
+      cur.h = Math.max(cur.h, +b.h);
+      cur.l = Math.min(cur.l, +b.l);
+      cur.c = +b.c;
+      cur.v += +b.v || 0;
+      cur.dEnd = b.d;
+    }
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+// 第 n 根週 K 當下的林恩如判定
+function linAt(wk, n) {
+  if (n < LIN.maW + 1) return { ok: false, weeks: wk.length };
+  const c = wk.map(b => b.c), v = wk.map(b => b.v);
+  const ma20 = sma(c, LIN.maW, n), ma20p = sma(c, LIN.maW, n - 1);
+  const above = wk[n].c > ma20, maUp = ma20 >= ma20p;
+  const boxHi = Math.max(...wk.slice(Math.max(0, n - LIN.boxW), n).map(b => b.h));
+  const brk = wk[n].c > boxHi;
+  const av = sma(v, LIN.maW, n - 1), volX = av > 0 ? wk[n].v / av : 0, burst = volX >= LIN.volX;
+  const { hs, ls } = pivots(wk.slice(0, n + 1), LIN.pivotW);
+  const h1 = hs.length >= 2 ? wk[hs[hs.length - 1]].h : null, h2 = hs.length >= 2 ? wk[hs[hs.length - 2]].h : null;
+  const l1 = ls.length >= 2 ? wk[ls[ls.length - 1]].l : null, l2 = ls.length >= 2 ? wk[ls[ls.length - 2]].l : null;
+  const wBottom = h1 != null && l1 != null && h1 > h2 && l1 > l2;
+  const mTop = h1 != null && l1 != null && h1 < h2 && l1 < l2;
+  const prevLow = ls.length ? wk[ls[ls.length - 1]].l : null;
+  const breakLow = prevLow != null && wk[n].c < prevLow && volX < 0.8;
+  const pull = LIN.allowPull && above && maUp && !brk && wk[n].l <= ma20 * 1.03 && wk[n].c > ma20;
+  const hits = [above, brk, wBottom, burst].filter(Boolean).length;
+  const exit = !above ? "跌破 20 週線" : !maUp ? "20 週線轉下" : mTop ? "M 頭" : breakLow ? "破底量縮" : "";
+  return { ok: true, weeks: wk.length, ma20, boxHi, volX, above, brk, wBottom, burst, maUp, pull, hits, pass: hits === 4 || pull, exit, prevLow };
+}
+const _linCache = new Map();
+function linOf(s) {
+  const last = s.bars[s.bars.length - 1] || {};
+  const k = s.code + ":" + s.bars.length + ":" + last.c;
+  if (!_linCache.has(k)) _linCache.set(k, (() => { const wk = toWeekly(s.bars); return linAt(wk, wk.length - 1); })());
+  return _linCache.get(k);
+}
+
+// 林恩如篩選：日均量 ≥ 500 張，且週線四條件全過
+function linSop(pool, minLots) {
+  const gate = minLots || LIN.minLots;
+  return s => (s.avgVol || 0) >= gate && linOf(s).pass;
+}
+
+// 林恩如回測：四條件成立的下一週開盤進、出場四條件任一成立當週收盤出，一次只持一筆
+function btRunLin(stock) {
+  const wk = toWeekly(stock.bars);
+  if (wk.length < 40) return { n: 0, weeks: wk.length, tooShort: true };
+  const trades = [];
+  let i = LIN.maW + 1;
+  while (i < wk.length - 1) {
+    const m = linAt(wk, i);
+    if (!m.pass) { i++; continue; }
+    const entry = wk[i + 1].o;
+    if (!(entry > 0)) { i++; continue; }
+    let exit = null, why = "", j = i + 1;
+    for (; j < wk.length; j++) {
+      const mj = linAt(wk, j);
+      if (mj.exit) { exit = wk[j].c; why = mj.exit; break; }
+    }
+    const open = exit == null;
+    if (open) { exit = wk[wk.length - 1].c; j = wk.length - 1; why = "持有中"; }
+    trades.push({ ret: (exit / entry - 1) * 100, held: j - i, why, at: wk[i + 1].d, entry, exit, open });
+    i = j + 1;
+  }
+  if (!trades.length) return { n: 0, weeks: wk.length };
+  const wins = trades.filter(t => t.ret > 0), losses = trades.filter(t => t.ret <= 0);
+  const avg = a => a.reduce((s, t) => s + t.ret, 0) / (a.length || 1);
+  return {
+    n: trades.length, weeks: wk.length,
+    win: Math.round(wins.length / trades.length * 100),
+    avgRet: avg(trades), avgWin: wins.length ? avg(wins) : 0, avgLoss: losses.length ? avg(losses) : 0,
+    best: Math.max(...trades.map(t => t.ret)), worst: Math.min(...trades.map(t => t.ret)),
+    held: Math.round(trades.reduce((s, t) => s + t.held, 0) / trades.length),
+    expect: avg(trades),
+    holding: trades[trades.length - 1].open,
+    last: trades.slice(-4).reverse()
+  };
+}
+
 // 版面四款：字級與文字對比不同，其餘結構相同
 const LAYOUTS = [
   { label: "標準", zoom: 1, n600: "var(--color-neutral-700)", n700: "var(--color-neutral-800)" },
@@ -1626,7 +1813,7 @@ class Component extends DCLogic {
       .then(res => res.ok ? res.json() : Promise.reject("no file"))
       .then(d => {
         if (!d || !Array.isArray(d.stocks) || !d.stocks.length) return Promise.reject("empty");
-        this.setState({ live: d, liveState: "live", pool: 0, sel: null, fetchedAt: Date.now(), src: "data.json" });
+        this.setState({ live: d, liveState: "live", pool: 1, sel: null, fetchedAt: Date.now(), src: "data.json" });
         this.loadMarket();
         // data.json 是收盤後的快照；接著在背景改抓即時價，抓得到就覆蓋
         this.liveScan(this.state.depth ?? 150);
@@ -1654,7 +1841,7 @@ class Component extends DCLogic {
           });
       }))
       .then(d => {
-        this.setState({ live: d, liveState: "live", pool: 0, sel: null, fetchedAt: Date.now(), src: "即時" });
+        this.setState({ live: d, liveState: "live", pool: 1, sel: null, fetchedAt: Date.now(), src: "即時" });
         this.expandScan();
       })
       .catch(e => this.setState(st => st.live
@@ -1726,6 +1913,24 @@ class Component extends DCLogic {
   };
   delPos = code => () => this.savePos((this.state.pos || []).filter(p => p.code !== code));
   setForm = k => e => this.setState({ form: Object.assign({}, this.state.form, { [k]: e.target.value }), formErr: "" });
+
+  // 交易筆記：依代號分組，只存在這台電腦
+  loadNotes() { try { return JSON.parse(localStorage.getItem("twk-notes") || "{}"); } catch (e) { return {}; } }
+  saveNotes(n) { try { localStorage.setItem("twk-notes", JSON.stringify(n)); } catch (e) {} this.setState({ notes: n }); }
+  addNote = (code, tag, text, plan) => {
+    if (!code || (!text && !plan)) return;
+    const all = Object.assign({}, this.state.notes || {});
+    const at = new Date().toISOString().slice(0, 10);
+    all[code] = (all[code] || []).concat([{ id: Date.now() + "", at, tag, text: text || "", plan: plan || null }]);
+    this.saveNotes(all);
+    this.setState({ noteDraft: "", noteTag: "", notePlan: null, noteMsg: "已存入" });
+    setTimeout(() => this.setState({ noteMsg: "" }), 3000);
+  };
+  delNote = (code, id) => () => {
+    const all = Object.assign({}, this.state.notes || {});
+    all[code] = (all[code] || []).filter(n => n.id !== id);
+    this.saveNotes(all);
+  };
 
   // 設定（手續費折數等）
   loadSet() { try { return JSON.parse(localStorage.getItem("twk-set") || "{}"); } catch (e) { return {}; } }
@@ -1855,7 +2060,7 @@ class Component extends DCLogic {
   componentDidMount() {
     this._tick = setInterval(() => this.forceUpdate(), 60000);
     const pos = this.loadPos();
-    this.setState({ trades: this.loadTrades(), dca: this.loadDca(), settings: this.loadSet() });
+    this.setState({ trades: this.loadTrades(), dca: this.loadDca(), settings: this.loadSet(), notes: this.loadNotes() });
     import("./live-fetch.js").then(m => m.fetchIndexBars()).then(b => this.setState({ idxBars: b })).catch(() => {});
     const grabNames = retry => import("./live-fetch.js").then(m => m.fetchNameMap())
       .then(names => { if (names && Object.keys(names).length) this.setState({ names }); })
@@ -1867,7 +2072,7 @@ class Component extends DCLogic {
       .then(d => {
         if (!d || !Array.isArray(d.stocks) || !d.stocks.length) return Promise.reject("empty");
         this.setState({ live: d, liveState: "live", fetchedAt: d.fetchedAt || Date.now() });
-        this.loadMarket();
+        setTimeout(() => this.loadMarket(), 400);   // 先讓首畫面畫完再載全市場
       })
       .catch(() => this.setState({ liveState: "demo" }));
   }
@@ -2411,13 +2616,24 @@ class Component extends DCLogic {
 
   all() {
     const live = this.state.live;
-    if (live) {
+    if (live && Array.isArray(live.stocks)) {
       const key = live.asOf + ":" + live.stocks.length;
       if (this._liveKey !== key) {
         this._liveKey = key;
-        this._live = live.stocks.filter(s => s.bars && s.bars.length > 70).map(s => metrics(s, s.bars.map(b => ({ o: +b.o, h: +b.h, l: +b.l, c: +b.c, v: +b.v }))));
+        if (!this._mcache || this._mcacheAsOf !== live.asOf) { this._mcache = new Map(); this._mcacheAsOf = live.asOf; }
+        const cache = this._mcache;
+        this._live = live.stocks.filter(s => s && s.bars && s.bars.length > 70)
+          .map(s => {
+            const hit = cache.get(s.code);
+            if (hit !== undefined) return hit;
+            let m = null;
+            try { m = metrics(s, s.bars.map(b => ({ d: b.d, o: +b.o, h: +b.h, l: +b.l, c: +b.c, v: +b.v }))); } catch (e) { m = null; }
+            cache.set(s.code, m);
+            return m;
+          })
+          .filter(Boolean);
       }
-      return dedupe(this._live, this.extras());
+      if (this._live.length) return dedupe(this._live, this.extras());
     }
     if (!this._d) this._d = UNIVERSE.map(analyse);
     return dedupe(this._d, this.extras());
@@ -2442,6 +2658,7 @@ class Component extends DCLogic {
     }
   };
 
+  // 第二層：全市場精簡快照。分批展開，每批之間讓出主執行緒，避免整頁卡住
   loadMarket() {
     if (this._mktTried) return;
     this._mktTried = true;
@@ -2449,27 +2666,51 @@ class Component extends DCLogic {
       .then(res => res.ok ? res.json() : Promise.reject(res.status))
       .then(d => {
         if (!d || !Array.isArray(d.stocks) || !Array.isArray(d.dates)) return;
-        this.setState(st => {
-          const live = st.live;
-          if (!live) return {};
-          const have = new Set(live.stocks.map(s => s.code));
+        const live = this.state.live;
+        if (!live) return;
+        // data.json 的類股名是手寫的（伺服器、IC設計…），與 market.json 的證交所分類不同套，
+        // 分組比較（龍頭、類股強弱）會失真。一律改用證交所分類。
+        const indBy = {};
+        d.stocks.forEach(s => { if (s && s.c) indBy[s.c] = indName(s.ind); });
+        let patched = false;
+        const baseStocks = live.stocks.map(s => {
+          const real = indBy[s.code];
+          if (real && real !== s.sector) { patched = true; return Object.assign({}, s, { sector: real }); }
+          return s;
+        });
+        if (patched) { this._mcache = null; this.setState({ live: Object.assign({}, live, { stocks: baseStocks }) }); }
+        const have = new Set(baseStocks.map(s => s.code));
+        const queue = d.stocks.filter(s => s && !have.has(s.c) && Array.isArray(s.b));
+        const dates = d.dates;
+        const grand = baseStocks.length + queue.length;   // 最終總數，一次算定
+        this.setState({ marketTotal: grand });
+        let i = 0;
+        const BATCH = 120;
+        const pump = () => {
           const add = [];
-          d.stocks.forEach(s => {
-            if (have.has(s.c) || !Array.isArray(s.b)) return;
-            const bars = [];
-            s.b.forEach((row, k) => {
-              if (!row) return;
-              bars.push({ d: d.dates[s.i + k], o: row[0], h: row[1], l: row[2], c: row[3], v: row[4] });
-            });
+          const end = Math.min(i + BATCH, queue.length);
+          for (; i < end; i++) {
+            const s = queue[i], bars = [];
+            for (let k = 0; k < s.b.length; k++) {
+              const row = s.b[k];
+              if (row) bars.push({ d: dates[s.i + k], o: row[0], h: row[1], l: row[2], c: row[3], v: row[4] });
+            }
             if (bars.length > 70) {
-              add.push({ code: s.c, name: s.n, sector: s.ind || "", pool: s.p ?? 0,
+              add.push({ code: s.c, name: s.n, sector: indName(s.ind), pool: s.p ?? 0,
                 bars, div1y: s.d || 0, instDays: 0, conc: null, concChg: null });
             }
-          });
-          if (!add.length) return {};
-          return { live: Object.assign({}, live, { stocks: live.stocks.concat(add) }),
-            marketTotal: live.stocks.length + add.length };
-        });
+          }
+          if (add.length) {
+            this.setState(st => st.live
+              ? { live: Object.assign({}, st.live, { stocks: st.live.stocks.concat(add) }),
+                  marketTotal: grand,
+                  mktProg: i < queue.length ? "載入全市場 " + i + "/" + queue.length : "" }
+              : {});
+          }
+          if (i < queue.length) setTimeout(pump, 0);
+          else this.setState({ mktProg: "" });
+        };
+        setTimeout(pump, 0);
       })
       .catch(() => {});
   }
@@ -2480,7 +2721,7 @@ class Component extends DCLogic {
     if (!keys.length) return [];
     if (this._exKey !== keys.join(",")) {
       this._exKey = keys.join(",");
-      this._ex = keys.map(k => metrics(ex[k], ex[k].bars.map(b => ({ o: +b.o, h: +b.h, l: +b.l, c: +b.c, v: +b.v }))));
+      this._ex = keys.map(k => ex[k] && ex[k].bars ? metrics(ex[k], ex[k].bars.map(b => ({ d: b.d, o: +b.o, h: +b.h, l: +b.l, c: +b.c, v: +b.v }))) : null).filter(Boolean);
     }
     return this._ex;
   }
@@ -2495,9 +2736,13 @@ class Component extends DCLogic {
     const minGates = this.props.minGates ?? 2;
     const { picked, types, sort } = this.state;
     const trendOnly = this.state.trendOnly;
-    let list = inPool.filter(s => s.gatesPassed >= minGates && (!trendOnly || s.gate1) && picked.every(k => s.hit[k]) && (types.length === 0 || types.includes(s.entryType)));
+    const sopOn = !!this.state.linSop;
+    const sopPass = sopOn ? linSop(inPool, 500) : null;
+    let list = inPool.filter(s => s.gatesPassed >= minGates && (!trendOnly || s.gate1) && (!sopOn || sopPass(s)) && picked.every(k => s.hit[k]) && (types.length === 0 || types.includes(s.entryType)));
     list = [...list].sort((a, b) => sort === "chg" ? b.chgPct - a.chgPct : sort === "rr" ? b.rr - a.rr : b.score - a.score);
-    const sel = all.find(s => s.code === this.state.sel) || list[0] || inPool[0];
+    const listTotal = list.length;
+    if (list.length > 60) list = list.slice(0, 60);   // 全市場疊上來後可能上千筆，只畫前 60
+    const sel = all.find(s => s.code === this.state.sel) || list[0] || inPool[0] || all[0];
     const days = this.props.chartDays ?? 60;
     const pick = code => () => this.setState({ sel: code, page: "board" });
     const structColor = s => s.hit.hh ? UP : s.struct === "結構未轉多" ? DOWN : "var(--color-accent-800)";
@@ -2571,23 +2816,38 @@ class Component extends DCLogic {
       const btKey = qs.code + ":" + qs.bars.length;
       if (!this._bt[btKey]) {
         const strict = btRun(qs, "strict"), loose = btRun(qs, "loose");
-        this._bt[btKey] = { strict, loose };
+        this._bt[btKey] = { strict, loose, lin: btRunLin(qs) };
       }
-      const bt = this._bt[btKey], use = bt.strict.n >= 3 ? bt.strict : bt.loose;
-      const usedLoose = use === bt.loose && bt.strict.n < 3;
+      const bt = this._bt[btKey];
+      const method = this.state.btMethod || "zhu";
+      const use = method === "lin" ? bt.lin : (bt.strict.n >= 3 ? bt.strict : bt.loose);
+      const usedLoose = method === "zhu" && use === bt.loose && bt.strict.n < 3;
+      qa.btMethodOpts = [["zhu", "朱式三關卡"], ["lin", "林恩如 20 週線"]].map(([k, label]) => ({
+        label, onClick: () => this.setState({ btMethod: k }),
+        bg: method === k ? "var(--color-accent-100)" : "transparent",
+        fg: method === k ? "var(--color-accent-800)" : "var(--meta-700)"
+      }));
+      qa.btShort = method === "lin" && !use.n
+        ? (use.tooShort
+            ? "週線樣本不足（只有 " + (use.weeks || 0) + " 週）。林恩如看的是 20 週線，至少要 40 週日 K 才跑得出意義。"
+            : "這 " + (use.weeks || 0) + " 週裡沒出現過四條件同時成立的進場點。")
+        : "";
+      qa.hasBtShort = !!qa.btShort;
       qa.bt = use.n ? {
-        mode: usedLoose ? "趨勢＋型態（三關卡樣本不足 " + bt.strict.n + " 次）" : "三關卡全過",
+        mode: method === "lin"
+          ? "20 週線四條件進（站上 20 週線、突破 12 週高、底底高峰峰高、量 1.5 倍）；跌破 20 週線／轉下／M 頭／破底量縮出（" + use.weeks + " 週）"
+          : usedLoose ? "趨勢＋型態（三關卡樣本不足 " + bt.strict.n + " 次）" : "三關卡全過",
         n: use.n + " 次", win: use.win + "%",
         winColor: use.win >= 55 ? UP : use.win >= 45 ? "var(--color-accent-800)" : DOWN,
         avgRet: (use.avgRet >= 0 ? "+" : "") + f2(use.avgRet) + "%",
         avgWin: "+" + f2(use.avgWin) + "%", avgLoss: f2(use.avgLoss) + "%",
         best: "+" + f2(use.best) + "%", worst: f2(use.worst) + "%",
-        held: use.held + " 天",
-        edge: use.expect >= 0.5 ? "這套訊號在這檔身上過去一年是賺的" : use.expect >= 0 ? "接近打平，優勢不明顯" : "過去一年在這檔身上是虧的，別勉強做",
+        held: use.held + (method === "lin" ? " 週" : " 天"),
+        edge: use.expect >= 0.5 ? "這套訊號在這檔身上，過去這段期間是賺的" : use.expect >= 0 ? "接近打平，優勢不明顯" : "過去這段期間在這檔身上是虧的，別勉強做",
         edgeColor: use.expect >= 0.5 ? UP : use.expect >= 0 ? "var(--color-accent-800)" : DOWN,
         last: use.last.map(t => ({
           at: t.at, ret: (t.ret >= 0 ? "+" : "") + f2(t.ret) + "%",
-          color: t.ret >= 0 ? UP : DOWN, why: t.why, held: t.held + " 天",
+          color: t.ret >= 0 ? UP : DOWN, why: t.why, held: t.held + (method === "lin" ? " 週" : " 天"),
           px: f2(t.entry) + " → " + f2(t.exit)
         }))
       } : null;
@@ -2617,7 +2877,16 @@ class Component extends DCLogic {
         first: (sh >= 1000 ? sh / 1000 + " 張" : sh + " 股") + " @ " + f2(s.close),
         addOn: f2(Math.max(s.neckline, s.close) * 1.02) + " 加碼",
         cost: money(cost), stop: f2(s.stop), risk: "−" + money(sh * s.risk),
-        reward: "+" + money(sh * (s.target - s.close)), shares: sh, onClick: pick(s.code)
+        reward: "+" + money(sh * (s.target - s.close)), shares: sh, onClick: pick(s.code),
+        onNote: e => {
+          if (e && e.stopPropagation) e.stopPropagation();
+          const unit = sh >= 1000 ? (sh / 1000) + " 張" : sh + " 股";
+          this.addNote(s.code, "進場計畫", "依今日預算計畫進場，" + unit + "。訊號：" + s.entryType + "、" + s.kBarName + "。",
+            { entry: s.close, stop: s.stop, add: Math.max(s.neckline, s.close) * 1.02, target: s.target, shares: sh });
+          this.setState({ noteFlash: s.code });
+          setTimeout(() => this.setState({ noteFlash: "" }), 2500);
+        },
+        noteLabel: this.state.noteFlash === s.code ? "已加入" : "＋筆記"
       };
     }).filter(a => a.shares > 0);
     const allocSum = {
@@ -2838,9 +3107,19 @@ class Component extends DCLogic {
       ck("籌碼", "法人連續買超", sel.hit.inst, sel.instDays + " 日"),
       ck("籌碼", "籌碼集中度上升", sel.hit.conc, (sel.concChg >= 0 ? "+" : "") + sel.concChg.toFixed(1) + "%")
     ];
+    const lin = sel.bars ? linOf(sel) : { ok: false };
+    if (lin.ok) {
+      checks.push(
+        ck("林恩如", "站上 20 週均線", lin.above, f2(lin.ma20)),
+        ck("林恩如", "突破近 12 週高點", lin.brk, f2(lin.boxHi)),
+        ck("林恩如", "底底高、峰峰高（W 底）", lin.wBottom, lin.hits + "/4"),
+        ck("林恩如", "當週爆量 ≥ 1.5 倍", lin.burst, f2(lin.volX) + "×"),
+        ck("林恩如", lin.exit ? "出場訊號：" + lin.exit : "無出場訊號", !lin.exit, lin.exit ? "出場" : "續抱")
+      );
+    }
 
     const holdings = MY_PICKS.map(c => all.find(s => s.code === c)).filter(Boolean).map(s => {
-      const cost = s.close * (0.9 + parseInt(s.code, 10) % 17 / 100);
+      const cost = s.close;   // 真實成本在「我的持股」頁；這裡只標示位置，不捏造損益
       const pl = (s.close / cost - 1) * 100;
       const trail = pl > 8 ? Math.max(s.ma20, cost) : Math.max(s.stop, cost * 0.93);
       const near = (s.close - trail) / s.close * 100;
@@ -2853,7 +3132,7 @@ class Component extends DCLogic {
       };
     });
 
-    const watch = inPool.filter(s => !list.includes(s)).sort((a, b) => b.score - a.score).slice(0, 4).map(s => ({
+    const watch = inPool.filter(s => !list.includes(s) && (!sopOn || sopPass(s))).sort((a, b) => b.score - a.score).slice(0, 4).map(s => ({
       name: s.code + "　" + s.name, trigger: "突破 " + f2(Math.max(s.neckline, s.close) * 1.003),
       missing: [!s.gate1 ? "趨勢" : null, !s.gate2 ? "型態" : null, !s.gate3 ? "K 線量" : null].filter(Boolean).join("、"),
       score: s.score, onClick: pick(s.code)
@@ -2866,7 +3145,7 @@ class Component extends DCLogic {
     })).sort((a, b) => parseInt(b.win) - parseInt(a.win));
 
     const sectorRaw = {};
-    inPool.forEach(s => { (sectorRaw[s.sector] = sectorRaw[s.sector] || []).push(s.chgPct * 2.4); });
+    inPool.forEach(s => { if (s.sector && s.sector !== "債券" && s.sector !== "管理股" && s.sector !== "欄位變更") (sectorRaw[s.sector] = sectorRaw[s.sector] || []).push(s.chgPct * 2.4); });
     const sectors = Object.entries(sectorRaw).map(([name, v]) => ({ name, raw: v.reduce((a, b) => a + b, 0) / v.length }))
       .sort((a, b) => b.raw - a.raw).slice(0, 7).map(s => {
         const w = Math.min(48, Math.abs(s.raw) * 9);
@@ -2890,9 +3169,11 @@ class Component extends DCLogic {
 
     // 盤後判讀：由當日計算結果生成，不是固定文案
     const notes = [];
-    const full = inPool.filter(s => s.gatesPassed === 3);
-    const partial = list.filter(s => !s.gate1);
-    const lead = list[0];
+    /* 盤後判讀只看個股：ETF 跟大盤同步，三關卡幾乎永遠成立，會長期霸榜把個股擠掉 */
+    const isEtfCode = s => /^00\d/.test(String(s.code));
+    const full = inPool.filter(s => s.gatesPassed === 3 && !isEtfCode(s));
+    const partial = list.filter(s => !s.gate1 && !isEtfCode(s));
+    const lead = list.find(s => !isEtfCode(s)) || list[0];
     if (list.length === 0) {
       notes.push({ tone: "warn", text: "今天" + poolLabels[poolIdx] + "沒有標的通過門檻。這套方法的第一條是趨勢不明就不做，空手也是一種持有。" });
     } else if (full.length === 0) {
@@ -2905,7 +3186,7 @@ class Component extends DCLogic {
     }
     const neckCount = list.filter(s => s.entryType === "突破頸線").length;
     if (neckCount >= 2) notes.push({ tone: "info", text: neckCount + " 檔屬於突破頸線型。若明天開盤直接跳空拉高，追高的風險報酬會變差，等回測頸線不破的那根 K 再進場比較划算。" });
-    if (partial.length && list.length) notes.push({ tone: "warn", text: "趨勢未轉多但被型態帶上名單的有 " + partial.map(s => s.name).join("、") + "。想更嚴格就開「只看趨勢已轉多」，這些會直接排除。" });
+    if (partial.length && list.length) notes.push({ tone: "warn", text: "趨勢未轉多但被型態帶上名單的有 " + partial.length + " 檔（" + partial.slice(0, 8).map(s => s.name).join("、") + (partial.length > 8 ? "…" : "") + "）。想更嚴格就開「只看趨勢已轉多」，這些會直接排除。" });
     const heavy = alloc.length ? null : true;
     if (heavy) notes.push({ tone: "warn", text: "以目前 " + money(budget) + " 元的預算算不出可買的第一批（沒有合格標的，或單筆風險上限壓到零股都不足）。提高預算或放寬條件再看。" });
     else notes.push({ tone: "info", text: "預算 " + money(budget) + " 元先投入 " + allocSum.cost + "（半部位），保留 " + allocSum.cash + " 給加碼與備援；全數停損也只賠 " + allocSum.risk + "，風險在可控範圍。" });
@@ -2914,7 +3195,7 @@ class Component extends DCLogic {
       else notes.push({ tone: "good", text: "你的 " + myPos.length + " 檔持股都還在計畫內，今天不用動作；總損益 " + myPosSum.pl + "，全部跌到停損的風險 " + myPosSum.risk + "。" });
     } else {
       const alerts = holdings.filter(h => h.alert !== "續抱");
-      if (alerts.length) notes.push({ tone: "warn", text: "示意持股（成本為假設值）先處理再找新標的：" + alerts.map(h => h.name.split("　")[1] + "（" + h.alert + "）").join("、") + "。" });
+      if (alerts.length) notes.push({ tone: "warn", text: "你的持股裡有訊號要處理：" + alerts.map(h => h.name.split("　")[1] + "（" + h.alert + "）").join("、") + "。" });
     }
     const envUp = mk.hasForeign ? (mk.foreignUp && mk.indexUp) : mk.indexUp;
     if (envUp) notes.push({ tone: "good", text: mk.hasForeign
@@ -2928,7 +3209,7 @@ class Component extends DCLogic {
 
     return {
       asOf: (this.state.live && this.state.live.asOf) || "2026 / 08 / 14",
-      dataSource: this.state.liveState === "live" ? (this.state.src === "即時" ? "即時抓取" : "data.json 快照") + "．已載入 " + all.length + " 檔" + (this.state.marketTotal ? "／全市場 " + this.state.marketTotal + " 檔" : "，按「全市場掃描」可擴大範圍") + (this.state.listNote ? "（" + this.state.listNote + "）" : "")
+      dataSource: this.state.liveState === "live" ? (this.state.mktProg ? this.state.mktProg + "．" : "") + (this.state.src === "即時" ? "即時抓取" : "data.json 快照") + "．已載入 " + (this.state.marketTotal ? Math.min(all.length, this.state.marketTotal) : all.length) + " 檔" + (this.state.marketTotal ? "／全市場 " + this.state.marketTotal + " 檔" : "，按「全市場掃描」可擴大範圍") + (this.state.listNote ? "（" + this.state.listNote + "）" : "")
         : this.state.liveState === "fetching" ? "抓取中 " + (this.state.prog || "")
         : this.state.liveState === "failed" ? "抓不到資料"
         : this.state.liveState === "loading" ? "讀取 data.json…" : "示意資料（按立即更新抓取）",
@@ -3021,7 +3302,18 @@ class Component extends DCLogic {
           bd: on ? "var(--color-accent)" : "var(--color-divider)",
           onClick: () => this.setState(st => ({ picked: on ? st.picked.filter(x => x !== g.key) : [...st.picked, g.key] })) };
       }),
-      clearChips: () => this.setState({ picked: [], types: [], trendOnly: false }),
+      clearChips: () => this.setState({ picked: [], types: [], trendOnly: false, linSop: false }),
+      sopToggle: {
+        label: sopOn ? "林恩如四條件．開" : "林恩如四條件",
+        bg: sopOn ? "var(--color-accent-100)" : "transparent",
+        fg: sopOn ? "var(--color-accent-800)" : "var(--meta-700)",
+        bd: sopOn ? "var(--color-accent)" : "var(--color-divider)",
+        onClick: () => this.setState(st => ({ linSop: !st.linSop }))
+      },
+      sopNote: sopOn
+        ? "林恩如四條件（週線）：站上 20 週均線、突破近 12 週高點、底底高峰峰高、當週量 ≥ 20 週均量 1.5 倍，四條全過才列；另加 20 日均量 500 張的流動性門檻。"
+        : "",
+      sopOn,
       trendToggle: {
         label: trendOnly ? "只看趨勢已轉多．開" : "只看趨勢已轉多",
         bg: trendOnly ? "var(--color-accent-100)" : "transparent",
@@ -3037,6 +3329,62 @@ class Component extends DCLogic {
       sortOpts: [["score", "評分"], ["chg", "漲跌"], ["rr", "R:R"]].map(([k, label]) => seg2(sort === k, label, () => this.setState({ sort: k }))),
       chart: { candles, mas, gridY, hlines, trend, pivots: pvMarks, dateLabels, marks, subLabel, subZeroY },
       chartLabel: days + " 根日 K", indicators, plan, planNote, checks, holdings, watch, sectors, backtest,
+      notes2: (() => {
+        const code = sel.code;
+        const mine = ((this.state.notes || {})[code] || []).slice().reverse();
+        const held = (this.state.pos || []).find(p => p.code === code);
+        const px = f2(sel.close), stop = f2(sel.stop), tgt = f2(sel.target);
+        const addPx = Math.max(sel.neckline, sel.close) * 1.02;
+        const basePlan = { entry: sel.close, stop: sel.stop, add: addPx, target: sel.target };
+        const quick = [
+          ["依計畫進場", "進場計畫", "依推薦進場。訊號：" + sel.entryType + "、" + sel.kBarName + "。", basePlan],
+          ["加碼", "加碼", "第二批進場。均價上移後停損同步拉高。", Object.assign({}, basePlan, { add: null })],
+          ["停損上移", "停損上移", "停損上移到成本，這筆不再允許變虧損。", { entry: sel.close, stop: sel.close, add: null, target: sel.target }],
+          ["出場", "出場", "出場。理由：", null],
+          ["觀察", "觀察", "先不進場，等突破 " + f2(sel.neckline) + " 再說。", { entry: null, stop: sel.stop, add: sel.neckline, target: sel.target }]
+        ].map(([label, tag, text, plan]) => ({
+          label, onClick: () => this.setState({ noteDraft: text, noteTag: tag, notePlan: plan })
+        }));
+        const liveOf = p => {
+          if (!p) return null;
+          const c = sel.close;
+          const pct = (a, b) => b ? ((a / b - 1) * 100) : null;
+          const bits = [];
+          if (p.entry) bits.push("進場 " + f2(p.entry) + "，現價 " + f2(c) + "（" + (c >= p.entry ? "+" : "") + f2(pct(c, p.entry)) + "%）");
+          else bits.push("現價 " + f2(c));
+          if (p.stop) bits.push("停損 " + f2(p.stop) + "（距離 " + f2(pct(c, p.stop)) + "%）");
+          if (p.add) bits.push("加碼點 " + f2(p.add));
+          if (p.target) bits.push("目標 " + f2(p.target));
+          let act = "續抱，什麼都不用做。", tone = "var(--meta-700)";
+          if (p.stop && c <= p.stop) { act = "已跌破停損，今天就出場，不要改數字。"; tone = DOWN; }
+          else if (p.target && c >= p.target) { act = "已達目標價，分批停利。"; tone = UP; }
+          else if (p.add && c >= p.add) { act = "已站上加碼點，可補進另一半部位。"; tone = UP; }
+          else if (p.entry && p.stop && c >= p.entry + (p.entry - p.stop)) { act = "獲利已達 1:1，停損上移到成本。"; tone = UP; }
+          return { line: bits.join("．"), act, tone };
+        };
+        return {
+          count: mine.length ? mine.length + " 則" + (held ? "．持有中" : "") : (held ? "持有中，還沒寫過筆記" : "還沒有筆記"),
+          quick,
+          draft: this.state.noteDraft || "",
+          onDraft: e => this.setState({ noteDraft: e.target.value }),
+          onSave: () => this.addNote(code, this.state.noteTag || (held ? "持有中" : "觀察"), (this.state.noteDraft || "").trim(), this.state.notePlan || null),
+          msg: this.state.noteMsg || "",
+          list: mine.map(n => {
+            const lv = liveOf(n.plan);
+            return { at: n.at, tag: n.tag || "", text: n.text, onDel: this.delNote(code, n.id),
+              hasPlan: !!lv, line: lv ? lv.line : "", act: lv ? lv.act : "", tone: lv ? lv.tone : "var(--meta-700)" };
+          }),
+          others: Object.keys(this.state.notes || {})
+            .filter(k => k !== code && ((this.state.notes || {})[k] || []).length)
+            .map(k => {
+              const arr = (this.state.notes || {})[k];
+              const nm = (all.find(s => s.code === k) || {}).name || (this.state.names || {})[k] || "";
+              return { code: k, title: k + "　" + nm, meta: arr.length + " 則．" + arr[arr.length - 1].at,
+                onOpen: () => this.setState({ sel: k }) };
+            }),
+          hasOthers: Object.keys(this.state.notes || {}).some(k => k !== code && ((this.state.notes || {})[k] || []).length)
+        };
+      })(),
       btNote: "2019–2026 上市櫃、訊號後 20 交易日、含手續費與交易稅（示意）",
       sel: { code: sel.code, name: sel.name, struct: sel.struct, structColor: structColor(sel), stage: sel.stage,
         close: f2(sel.close), chg: (sel.chgPct >= 0 ? "+" : "") + f2(sel.chgPct) + "%", chgColor: sel.chgPct >= 0 ? UP : DOWN,

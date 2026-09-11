@@ -39,7 +39,7 @@ TWSE_INFO = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"
 TPEX_ALL = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes"
 TPEX_INFO = "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap03_O"
 
-BARS_KEEP = 150          # data.json 保留根數（指標至少需要 71 根）
+BARS_KEEP = 600          # data.json 保留根數（約兩年半；林式週 KD 回測需要長歷史）
 BARS_MARKET = 90         # market.json 保留根數（壓檔案大小）
 INST_LOOKBACK = 12       # 三大法人回看交易日數
 WORKERS = 6              # 全市場抓取並行數（太高會被 Yahoo 限流）
@@ -67,7 +67,7 @@ POOLS = {
         ("1303", "南亞", "塑膠")],
     3: [],  # 自選股：填 ("代號", "名稱", "類股")
 }
-MY_PICKS = ["2330", "2382", "2603", "2345", "3231"]
+MY_PICKS = ["1402", "2330", "2618", "2883", "2885", "2886", "2887", "2891", "4162", "5469", "6125", "6164", "6189", "6213", "9934"]   # 你持有的個股（要和 dashboard.dc.html 的 MY_PICKS 一致）
 
 
 def get_json(url, params=None, retries=3, quiet=False):
@@ -130,7 +130,7 @@ def yahoo_raw(code, market, rng):
     return [], 0.0
 
 
-def yahoo_bars(symbol, rng="1y"):
+def yahoo_bars(symbol, rng="5y"):
     """關注清單用：回傳 dict 形式的日 K，並記錄配息。"""
     code, _, suf = symbol.partition(".")
     market = 2 if suf == "TWO" else 1
@@ -153,6 +153,30 @@ def index_bars():
 
 # ── 全市場清單 ────────────────────────────────────────────────────────────
 
+TWSE_IND = {
+    "01": "水泥", "02": "食品", "03": "塑膠", "04": "紡織", "05": "電機機械", "06": "電器電纜",
+    "07": "化學生技醫療", "08": "玻璃陶瓷", "09": "造紙", "10": "鋼鐵", "11": "橡膠", "12": "汽車",
+    "13": "電子", "14": "建材營造", "15": "航運", "16": "觀光餐旅", "17": "金融保險",
+    "18": "貿易百貨", "19": "綜合", "20": "其他", "21": "化學工業", "22": "生技醫療",
+    "23": "油電燃氣", "24": "半導體", "25": "電腦及週邊設備", "26": "光電", "27": "通信網路",
+    "28": "電子零組件", "29": "電子通路", "30": "資訊服務", "31": "其他電子", "32": "文化創意",
+    "33": "農業科技", "34": "電子商務", "35": "綠能環保", "36": "數位雲端", "37": "運動休閒",
+    "38": "居家生活", "80": "管理股", "91": "債券", "97": "欄位變更", "99": "其他",
+}
+
+
+def ind_name(raw):
+    """產業別代碼轉中文；data.json 與 market.json 必須用同一套名稱。"""
+    s = str(raw or "").strip()
+    if not s:
+        return ""
+    if s in TWSE_IND:
+        return TWSE_IND[s]
+    if s.isdigit() and s.zfill(2) in TWSE_IND:
+        return TWSE_IND[s.zfill(2)]
+    return s
+
+
 def market_listing():
     """回傳 [(code, name, market, industry)]，market 1=上市 2=上櫃。"""
     out, seen = [], set()
@@ -164,7 +188,7 @@ def market_listing():
             c = str(r.get("公司代號") or r.get("SecuritiesCompanyCode") or "").strip()
             ind = str(r.get("產業別") or r.get("SecuritiesIndustryCode") or "").strip()
             if c and ind:
-                industry[c] = ind
+                industry[c] = ind_name(ind)
 
     tw = get_json(TWSE_ALL) or []
     for r in tw:
@@ -315,6 +339,14 @@ def build_watchlist():
     groups = {p: [(c, n, s) for c, n, s in m] for p, m in POOLS.items()}
     for code, name, sector, pool in watchlist_extra():
         groups.setdefault(pool, []).append((code, name, sector))
+    # 類股一律改用證交所／櫃買的產業別，才能與 market.json 同一套分組
+    industry = {}
+    for url in (TWSE_INFO, TPEX_INFO):
+        for r in get_json(url, quiet=True) or []:
+            c = str(r.get("公司代號") or r.get("SecuritiesCompanyCode") or "").strip()
+            ind = str(r.get("產業別") or r.get("SecuritiesIndustryCode") or "").strip()
+            if c and ind:
+                industry[c] = ind_name(ind)
     stocks, as_of = [], None
     for pool, members in groups.items():
         for code, name, sector in members:
@@ -322,7 +354,8 @@ def build_watchlist():
             if len(bars) < 71:
                 print(f"  ! {code} {name} 資料不足（{len(bars)} 根），略過")
                 continue
-            stocks.append({"code": code, "name": name, "sector": sector,
+            stocks.append({"code": code, "name": name,
+                           "sector": industry.get(code) or ("ETF" if is_etf(code) else sector),
                            "pool": pool, "bars": bars, "div1y": DIV1Y.get(code, 0)})
             as_of = max(as_of or "", bars[-1]["d"])
             print(f"  {code} {name} {len(bars)} 根，最新 {bars[-1]['d']} 收 {bars[-1]['c']}")
